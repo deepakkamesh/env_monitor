@@ -5,7 +5,7 @@
 
 char display[5] = "";
 
-int Display(char *d) {
+int Display(char* d) {
   if (strlen(d) > 4) {
     strcpy(display, "ERR");
     return -1;
@@ -17,7 +17,7 @@ int Display(char *d) {
 void HPltc5851DisplayTask(void) {
   static char i = 0;
   static uint32_t last = 0;
-  
+
   uint8_t len = strlen(display);
   uint32_t now = TickGet();
   if ((now - last) / (TICK_MILLISECOND) >= 2) {
@@ -69,6 +69,12 @@ void HPltc5851DisplayTask(void) {
         break;
       case 'A':
         MULTIPLEXER = ALPHA_A;
+        break;
+      case 'H':
+        MULTIPLEXER = ALPHA_H;
+        break;
+      case 'T':
+        MULTIPLEXER = ALPHA_T;
         break;
     }
 

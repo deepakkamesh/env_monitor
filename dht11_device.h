@@ -15,6 +15,9 @@ extern "C" {
 void DHT11Task(void);
 void myTMR2ISR(void);
 void DHT11Init(void);
+int8_t GetTemp(void);
+int8_t GetHumidity(void);
+
 
 
 #ifdef	__cplusplus

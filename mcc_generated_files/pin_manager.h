@@ -59,6 +59,20 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set DHT11 aliases
+#define DHT11_TRIS               TRISAbits.TRISA0
+#define DHT11_LAT                LATAbits.LATA0
+#define DHT11_PORT               PORTAbits.RA0
+#define DHT11_ANS                ANSELAbits.ANSA0
+#define DHT11_SetHigh()            do { LATAbits.LATA0 = 1; } while(0)
+#define DHT11_SetLow()             do { LATAbits.LATA0 = 0; } while(0)
+#define DHT11_Toggle()             do { LATAbits.LATA0 = ~LATAbits.LATA0; } while(0)
+#define DHT11_GetValue()           PORTAbits.RA0
+#define DHT11_SetDigitalInput()    do { TRISAbits.TRISA0 = 1; } while(0)
+#define DHT11_SetDigitalOutput()   do { TRISAbits.TRISA0 = 0; } while(0)
+#define DHT11_SetAnalogMode()  do { ANSELAbits.ANSA0 = 1; } while(0)
+#define DHT11_SetDigitalMode() do { ANSELAbits.ANSA0 = 0; } while(0)
+
 // get/set IO_RA4 aliases
 #define IO_RA4_TRIS               TRISAbits.TRISA4
 #define IO_RA4_LAT                LATAbits.LATA4

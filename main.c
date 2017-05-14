@@ -43,17 +43,24 @@
     TERMS.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "mcc_generated_files/mcc.h"
 #include "hp_ltc5851.h"
 #include "tick.h"
+#include "dht11_device.h"
 
 /*
                          Main application
  */
+void DisplayTask(void);
+
 void main(void) {
   // Initialize the device
   SYSTEM_Initialize();
   InitTicker();
+  void DHT11Init(void);
+
   // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
   // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
   // Use the following macros to:
@@ -77,7 +84,7 @@ void main(void) {
   //INTERRUPT_GlobalInterruptDisable();
 
   // Enable the Peripheral Interrupts
-  INTERRUPT_PeripheralInterruptEnable();
+  //INTERRUPT_PeripheralInterruptEnable();
 
   // Disable the Peripheral Interrupts
   //INTERRUPT_PeripheralInterruptDisable();
@@ -85,21 +92,38 @@ void main(void) {
   while (1) {
     // Add your application code
     HPltc5851DisplayTask();
-    //   IO_RC0_SetLow();
-    // IO_RA4_SetLow();
-    // IO_RC1_SetLow();
-    //  __delay_ms(500);
-    //IO_RC0_SetHigh();
-    //   IO_RA4_SetHigh();
-    //  __delay_ms(500);
-
-    // IO_RC1_SetHigh();
-    //  Display('1', '2', '3', '4');
-    // __delay_ms(500);
-    Display("2");
-
+    DHT11Task();
+    DisplayTask();
   }
 }
+
+void DisplayTask(void) {
+  static uint32_t last = 0;
+  static char bTemp = 0;
+  int8_t temp = 0, humidity = 0;
+  char disp[5] = "\0\0\0\0\0";
+
+  uint32_t now = TickGet();
+  if ((now - last) / (TICK_MILLISECOND) >= 1000) {
+    last = now;
+    temp = GetTemp();
+    humidity = GetHumidity();
+    if (temp == -1 || humidity == -1) {
+      Display("ERR");
+    } else {
+      if (bTemp) {
+        sprintf(disp, "T%03d", temp);
+        bTemp = 0;
+      } else {
+        sprintf(disp, "H%03d", humidity);
+        bTemp = 1;
+      }
+      Display(disp);
+      __delay_ms(1);
+    }
+  }
+}
+
 /**
  End of File
  */
