@@ -32,13 +32,11 @@ extern "C" {
 #define ALPHA_C 0b11000110
 #define ALPHA_D 0b10110001
 #define ALPHA_E 0b10000110
-#define ALPHA_R 0b10101111
 #define ALPHA_H 0b10001001
+#define ALPHA_R 0b10101111
 #define ALPHA_T 0b10000111
-
-
-
-
+  
+#define CHAR_DASH 0b10111111
 
 #define DIGIT1_PORT IO_RA4_LAT 
 #define DIGIT2_PORT IO_RA5_LAT

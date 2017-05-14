@@ -54,12 +54,13 @@
                          Main application
  */
 void DisplayTask(void);
+void DisplayError(int8_t errorCode);
 
 void main(void) {
   // Initialize the device
   SYSTEM_Initialize();
   InitTicker();
-  void DHT11Init(void);
+  DHT11Init();
 
   // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
   // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
@@ -84,7 +85,7 @@ void main(void) {
   //INTERRUPT_GlobalInterruptDisable();
 
   // Enable the Peripheral Interrupts
-  //INTERRUPT_PeripheralInterruptEnable();
+  INTERRUPT_PeripheralInterruptEnable();
 
   // Disable the Peripheral Interrupts
   //INTERRUPT_PeripheralInterruptDisable();
@@ -100,16 +101,17 @@ void main(void) {
 void DisplayTask(void) {
   static uint32_t last = 0;
   static char bTemp = 0;
-  int8_t temp = 0, humidity = 0;
+  int8_t temp = 0, humidity = 0, err = 0;
   char disp[5] = "\0\0\0\0\0";
 
   uint32_t now = TickGet();
   if ((now - last) / (TICK_MILLISECOND) >= 1000) {
     last = now;
+    err = GetError();
     temp = GetTemp();
     humidity = GetHumidity();
-    if (temp == -1 || humidity == -1) {
-      Display("ERR");
+    if (err < 0) {
+      DisplayError(err);
     } else {
       if (bTemp) {
         sprintf(disp, "T%03d", temp);
@@ -119,11 +121,26 @@ void DisplayTask(void) {
         bTemp = 1;
       }
       Display(disp);
-      __delay_ms(1);
     }
   }
 }
 
+void DisplayError(int8_t errorCode) {
+  switch (errorCode) {
+    case ERR_DHT11_TIMEOUT_RESPONSE:
+      Display("E-01");
+      break;
+    case ERR_DHT11_CHECKSUM_FAILURE:
+      Display("E-02");
+      break;
+    case ERR_DHT11_TIMEOUT_DATA:
+      Display("E-03");
+      break;
+    default:
+      Display("E-00");
+      break;
+  }
+}
 /**
  End of File
  */

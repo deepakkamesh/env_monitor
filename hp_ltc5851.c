@@ -20,8 +20,7 @@ void HPltc5851DisplayTask(void) {
 
   uint8_t len = strlen(display);
   uint32_t now = TickGet();
-  if ((now - last) / (TICK_MILLISECOND) >= 2) {
-
+  if ((now - last) / (TICK_MILLISECOND) >= 5) {
     last = now;
 
     DIGIT1_PORT = 1;
@@ -61,21 +60,35 @@ void HPltc5851DisplayTask(void) {
       case '9':
         MULTIPLEXER = NUM_9;
         break;
-      case 'E':
-        MULTIPLEXER = ALPHA_E;
-        break;
-      case 'R':
-        MULTIPLEXER = ALPHA_R;
-        break;
       case 'A':
         MULTIPLEXER = ALPHA_A;
+        break;
+      case 'B':
+        MULTIPLEXER = ALPHA_B;
+        break;
+      case 'C':
+        MULTIPLEXER = ALPHA_C;
+        break;
+      case 'D':
+        MULTIPLEXER = ALPHA_D;
+        break;
+      case 'E':
+        MULTIPLEXER = ALPHA_E;
         break;
       case 'H':
         MULTIPLEXER = ALPHA_H;
         break;
+      case 'R':
+        MULTIPLEXER = ALPHA_R;
+        break;
       case 'T':
         MULTIPLEXER = ALPHA_T;
         break;
+      case '-':
+        MULTIPLEXER = CHAR_DASH;
+        break;
+      default:
+        MULTIPLEXER = ALPHA_E;
     }
 
     // Turn on the digit.
@@ -93,14 +106,13 @@ void HPltc5851DisplayTask(void) {
         DIGIT4_PORT = 0;
         break;
     }
-    i++;
 
+    i++;
     // Reset counter.
     if (i == len) {
       i = 0;
     }
   }
-
 }
 
 

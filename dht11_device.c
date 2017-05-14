@@ -1,11 +1,14 @@
 #include "tick.h"
 #include "mcc_generated_files/mcc.h"
+#include "dht11_device.h"
 
 
 unsigned short t2OF = 0; // Timer 2 Overflow.
-int8_t temp = 0, humidity = 0;
+int8_t temp = 0, humidity = 0, errCode = 0;
 
-// myTMR2ISR is the callback function for Timer2 Interrupt.
+int8_t GetError(void) {
+  return errCode;
+}
 
 int8_t GetTemp(void) {
   return temp;
@@ -14,6 +17,8 @@ int8_t GetTemp(void) {
 int8_t GetHumidity(void) {
   return humidity;
 }
+
+// myTMR2ISR is the callback function for Timer2 Interrupt.
 
 void myTMR2ISR(void) {
   t2OF = 1;
@@ -59,8 +64,6 @@ void DHT11Task(void) {
   static uint32_t last = 0;
   uint8_t packet[5];
 
-
-
   uint32_t now = TickGet();
   if ((now - last) / (TICK_MILLISECOND) >= 1000) {
     last = now;
@@ -74,27 +77,27 @@ void DHT11Task(void) {
     DHT11_SetLow();
     DHT11_SetDigitalInput();
 
-    // Check response sequence from sensor.
-    TMR2_WriteTimer(0);
-    while (1) { // 80us low.
-      if (DHT11_GetValue()) {
-        break;
-      }
-      if (TMR2_ReadTimer() > 150) {
-        temp = -1;
-        humidity = -1;
-        return;
-      }
+    // Check for response sequence from sensor.
+    TMR2_WriteTimer(0); // Timer2 overflow is timeout.
+    t2OF = 0;
+    while (!DHT11_GetValue() && !t2OF); // 80us low.
+    if (t2OF) {
+      errCode = ERR_DHT11_TIMEOUT_RESPONSE;
+      return;
     }
-
-    while (DHT11_GetValue()); // 80us high.
+    TMR2_WriteTimer(0);
+    t2OF = 0;
+    while (DHT11_GetValue() && !t2OF); // 80us high.
+    if (t2OF) {
+      errCode = ERR_DHT11_TIMEOUT_RESPONSE;
+      return;
+    }
 
     // Read data from sensor.
     for (uint8_t i = 0; i <= 4; i++) {
       int16_t data = ReadByte();
       if (data == -1) {
-        temp = -1;
-        humidity = -1;
+        errCode = ERR_DHT11_TIMEOUT_DATA;
         return;
       }
       packet[i] = data;
@@ -102,16 +105,14 @@ void DHT11Task(void) {
 
     // Verify checksum.
     if (packet[4] != (packet[0] + packet[1] + packet[2] + packet[3])& 0xFF) {
-      temp = -1;
-      humidity = -1;
+      errCode = ERR_DHT11_CHECKSUM_FAILURE;
       return;
     }
 
+    errCode = 0;
     humidity = packet[0];
-    temp = packet[2]*1.8 + 32; // Convert to Farenheit.
+    temp = (int8_t) packet[2]*1.8 + 32; // Convert to Farenheit.
     return;
   }
-
-
 }
 

@@ -1239,7 +1239,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG4L" settingAlias="LVP"/>
-         <value>ON</value>
+         <value>OFF</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR2" name="timerPeriodActual"/>
@@ -2251,7 +2251,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG4L"/>
-         <value>133</value>
+         <value>129</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="OSCCON2" settingAlias="SOSCGO" alias="disabled"/>
@@ -3144,12 +3144,12 @@
          <hash>fede2fc0c366b5067f8d221f6e386f55809c80a88df33e09e51d0f2cbe27d1ce</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/tmr0.c</file>
-         <hash>6f98dbb0a0ce78184ebab976bd2af3d4aa07f12cc12c85504b795634e2882d2c</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/pin_manager.h</file>
          <hash>fad4eae5d478244a20a73830b5f75a4676bd687641bd83ca80ce23afbc6b8a83</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/tmr0.c</file>
+         <hash>6f98dbb0a0ce78184ebab976bd2af3d4aa07f12cc12c85504b795634e2882d2c</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/tmr2.h</file>
@@ -3157,7 +3157,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/mcc.h</file>
-         <hash>f3e425f5312aa5896250d2e88c83133a48a728d171cb88b9a0bbd5efcd909085</hash>
+         <hash>68045f79a37e9ca3856648884f4816ce2aa29b71e34014352ca3a81edfce9f76</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/tmr2.c</file>
@@ -3169,15 +3169,15 @@
       </entry>
       <entry>
          <file>mcc_generated_files/mcc.c</file>
-         <hash>350214153303fee0b9f2852850e8bdc40d1c93dc2e0369c65b9af62518da1d38</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files/tmr0.h</file>
-         <hash>ecc38fdf09fc7fc96bfc39060e32831ce26c083642732aace63d863b19068927</hash>
+         <hash>8c373e3cb824f6f14469d8bda2ac08a7a8a6312714ad43f34f58f4e2cbc9a680</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/pin_manager.c</file>
          <hash>c56a191c1be6f1cbf9323cfce520ab09a3b04a3e039baa4b602b0db9b687a98e</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/tmr0.h</file>
+         <hash>ecc38fdf09fc7fc96bfc39060e32831ce26c083642732aace63d863b19068927</hash>
       </entry>
    </generatedFileHashHistoryMap>
 </config>
