@@ -49,12 +49,11 @@
 #include "hp_ltc5851.h"
 #include "tick.h"
 #include "dht11_device.h"
+#include "pushbutton_device.h"
 
 /*
                          Main application
  */
-void DisplayTask(void);
-void DisplayError(int8_t errorCode);
 
 void main(void) {
   // Initialize the device
@@ -95,52 +94,11 @@ void main(void) {
     HPltc5851DisplayTask();
     DHT11Task();
     DisplayTask();
+    PushButtonTask();
   }
 }
 
-void DisplayTask(void) {
-  static uint32_t last = 0;
-  static char bTemp = 0;
-  int8_t temp = 0, humidity = 0, err = 0;
-  char disp[5] = "\0\0\0\0\0";
 
-  uint32_t now = TickGet();
-  if ((now - last) / (TICK_MILLISECOND) >= 1000) {
-    last = now;
-    err = GetError();
-    temp = GetTemp();
-    humidity = GetHumidity();
-    if (err < 0) {
-      DisplayError(err);
-    } else {
-      if (bTemp) {
-        sprintf(disp, "T%03d", temp);
-        bTemp = 0;
-      } else {
-        sprintf(disp, "H%03d", humidity);
-        bTemp = 1;
-      }
-      Display(disp);
-    }
-  }
-}
-
-void DisplayError(int8_t errorCode) {
-  switch (errorCode) {
-    case ERR_DHT11_TIMEOUT_RESPONSE:
-      Display("E-01");
-      break;
-    case ERR_DHT11_CHECKSUM_FAILURE:
-      Display("E-02");
-      break;
-    case ERR_DHT11_TIMEOUT_DATA:
-      Display("E-03");
-      break;
-    default:
-      Display("E-00");
-      break;
-  }
-}
 /**
  End of File
  */

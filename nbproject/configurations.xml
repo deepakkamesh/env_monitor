@@ -16,6 +16,7 @@
       <itemPath>hp_ltc5851.h</itemPath>
       <itemPath>tick.h</itemPath>
       <itemPath>dht11_device.h</itemPath>
+      <itemPath>pushbutton_device.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -37,6 +38,7 @@
       <itemPath>hp_ltc5851.c</itemPath>
       <itemPath>tick.c</itemPath>
       <itemPath>dht11_device.c</itemPath>
+      <itemPath>pushbutton_device.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

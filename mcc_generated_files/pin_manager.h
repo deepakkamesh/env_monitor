@@ -120,6 +120,40 @@
 #define IO_RA7_SetDigitalInput()    do { TRISAbits.TRISA7 = 1; } while(0)
 #define IO_RA7_SetDigitalOutput()   do { TRISAbits.TRISA7 = 0; } while(0)
 
+// get/set PB_A aliases
+#define PB_A_TRIS               TRISBbits.TRISB0
+#define PB_A_LAT                LATBbits.LATB0
+#define PB_A_PORT               PORTBbits.RB0
+#define PB_A_WPU                WPUBbits.WPUB0
+#define PB_A_ANS                ANSELBbits.ANSB0
+#define PB_A_SetHigh()            do { LATBbits.LATB0 = 1; } while(0)
+#define PB_A_SetLow()             do { LATBbits.LATB0 = 0; } while(0)
+#define PB_A_Toggle()             do { LATBbits.LATB0 = ~LATBbits.LATB0; } while(0)
+#define PB_A_GetValue()           PORTBbits.RB0
+#define PB_A_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
+#define PB_A_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
+#define PB_A_SetPullup()      do { WPUBbits.WPUB0 = 1; } while(0)
+#define PB_A_ResetPullup()    do { WPUBbits.WPUB0 = 0; } while(0)
+#define PB_A_SetAnalogMode()  do { ANSELBbits.ANSB0 = 1; } while(0)
+#define PB_A_SetDigitalMode() do { ANSELBbits.ANSB0 = 0; } while(0)
+
+// get/set PB_B aliases
+#define PB_B_TRIS               TRISBbits.TRISB1
+#define PB_B_LAT                LATBbits.LATB1
+#define PB_B_PORT               PORTBbits.RB1
+#define PB_B_WPU                WPUBbits.WPUB1
+#define PB_B_ANS                ANSELBbits.ANSB1
+#define PB_B_SetHigh()            do { LATBbits.LATB1 = 1; } while(0)
+#define PB_B_SetLow()             do { LATBbits.LATB1 = 0; } while(0)
+#define PB_B_Toggle()             do { LATBbits.LATB1 = ~LATBbits.LATB1; } while(0)
+#define PB_B_GetValue()           PORTBbits.RB1
+#define PB_B_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
+#define PB_B_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
+#define PB_B_SetPullup()      do { WPUBbits.WPUB1 = 1; } while(0)
+#define PB_B_ResetPullup()    do { WPUBbits.WPUB1 = 0; } while(0)
+#define PB_B_SetAnalogMode()  do { ANSELBbits.ANSB1 = 1; } while(0)
+#define PB_B_SetDigitalMode() do { ANSELBbits.ANSB1 = 0; } while(0)
+
 // get/set IO_RC0 aliases
 #define IO_RC0_TRIS               TRISCbits.TRISC0
 #define IO_RC0_LAT                LATCbits.LATC0
