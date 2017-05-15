@@ -95,6 +95,7 @@ void main(void) {
     DHT11Task();
     DisplayTask();
     PushButtonTask();
+    WriteMemoryTask();
   }
 }
 

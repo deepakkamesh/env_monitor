@@ -3,13 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/dht11_device.h</file>
+            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/mcc_generated_files/memory.h</file>
+            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/pushbutton_device.c</file>
             <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/main.c</file>
-            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/dht11_device.c</file>
-            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/mcc_generated_files/tmr2.c</file>
-            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/hp_ltc5851.h</file>
-            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/mcc_generated_files/pin_manager.h</file>
-            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/hp_ltc5851.c</file>
+            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/README.txt</file>
+            <file>file:/Users/dkg/Projects/Temp_Humidity_Display.X/pushbutton_device.h</file>
         </group>
     </open-files>
 </project-private>

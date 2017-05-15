@@ -16,11 +16,22 @@ extern "C" {
 
   void DisplayTask(void);
   void DisplayError(int8_t errorCode);
+  void WriteMemoryTask(void);
 
+  // Display Modes.
 #define TEMP_ONLY 0x1
 #define HUMIDITY_ONLY 0x2
 #define TEMP_HUMIDITY 0x3
 
+  // Modes
+#define NORMAL 0x1
+#define SELECT_INTERVAL 0x2
+#define VIEW_STORED 0x3
+
+  // PusbButtons
+#define BUTTON_A 0x1
+#define BUTTON_B 0x2
+  
 #ifdef	__cplusplus
 }
 #endif

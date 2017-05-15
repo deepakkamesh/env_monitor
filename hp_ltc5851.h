@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
   void HPltc5851DisplayTask(void);
-  int Display(char * );
+  int Display(char *);
 
   // Order of connection A..G, DP.
 #define NUM_0 0b11000000
@@ -26,16 +26,17 @@ extern "C" {
 #define NUM_7 0b11111000
 #define NUM_8 0b10000000
 #define NUM_9 0b10010000
-  
+
 #define ALPHA_A 0b10001000     
 #define ALPHA_B 0b10000011     
 #define ALPHA_C 0b11000110
 #define ALPHA_D 0b10110001
 #define ALPHA_E 0b10000110
 #define ALPHA_H 0b10001001
+#define ALPHA_I 0b11001111
 #define ALPHA_R 0b10101111
 #define ALPHA_T 0b10000111
-  
+
 #define CHAR_DASH 0b10111111
 
 #define DIGIT1_PORT IO_RA4_LAT 

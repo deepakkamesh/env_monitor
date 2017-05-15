@@ -87,6 +87,9 @@ void HPltc5851DisplayTask(void) {
       case '-':
         MULTIPLEXER = CHAR_DASH;
         break;
+      case 'I':
+        MULTIPLEXER = ALPHA_I;
+        break;
       default:
         MULTIPLEXER = ALPHA_E;
     }
