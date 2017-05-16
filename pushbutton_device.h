@@ -13,11 +13,11 @@ extern "C" {
 #endif
 
   void PushButtonTask(void);
-
   void DisplayTask(void);
   void DisplayError(int8_t errorCode);
   void WriteMemoryTask(void);
-
+  void PushButtonInit(void);
+  
   // Display Modes.
 #define TEMP_ONLY 0x1
 #define HUMIDITY_ONLY 0x2
@@ -31,7 +31,7 @@ extern "C" {
   // PusbButtons
 #define BUTTON_A 0x1
 #define BUTTON_B 0x2
-  
+
 #ifdef	__cplusplus
 }
 #endif

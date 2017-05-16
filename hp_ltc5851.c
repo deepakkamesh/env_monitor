@@ -5,7 +5,7 @@
 
 char display[5] = "";
 
-int Display(char* d) {
+int Display(const char d[]) {
   if (strlen(d) > 4) {
     strcpy(display, "ERR");
     return -1;

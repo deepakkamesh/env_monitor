@@ -60,6 +60,7 @@ void main(void) {
   SYSTEM_Initialize();
   InitTicker();
   DHT11Init();
+  PushButtonInit();
 
   // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
   // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
