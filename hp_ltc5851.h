@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
   void HPltc5851DisplayTask(void);
-  int Display(const char b[]);
+  int Display(const char b[], uint8_t dt);
 
   // Order of connection A..G, DP.
 #define NUM_0 0b11000000

@@ -9,10 +9,10 @@
 
 #define SHORT_CLICK 100
 #define LONG_CLICK 3000 
-#define DISPLAY_ALT 1000
+#define DISPLAY_ALT 1000 // Switch time for alternating display in ms.
 #define MODE_TIMEOUT 10000  // Timeout in ms before going back to mode normal.
 
-#define MAX_DATA_ADDR 8 // Should be an even number. Max readings is MAX_ADDR/2
+#define MAX_DATA_ADDR 20 // Should be an even number. Max readings is MAX_ADDR/2
 #define CONFIG_ADDR 1020
 
 uint8_t mode = NORMAL;
@@ -27,7 +27,7 @@ uint16_t writePtr = 0; // Pointer to the next address to be read.
 void modeHandler(uint16_t dur, uint8_t button);
 void writeData(uint8_t temp, uint8_t humidity);
 void resetData(void);
-void AltDisplay(char[], char []);
+void AltDisplay(const char[5][5], uint8_t len);
 
 void PushButtonTask(void) {
   static uint16_t dur = 0;
@@ -81,6 +81,7 @@ void PushButtonTask(void) {
 }
 
 // modeHandler handles the switches between different modes.
+uint8_t mdisp[3] = {0};
 
 void modeHandler(uint16_t dur, uint8_t button) {
   char disp[5] = "";
@@ -105,10 +106,10 @@ void modeHandler(uint16_t dur, uint8_t button) {
       mode = SELECT_INTERVAL;
       modeTimeout = TickGet();
       sprintf(disp, "I%03d", interval);
-      Display(disp);
+      Display(disp, 0);
     }
     // Switch to Data View mode.
-    if (dur >= LONG_CLICK && button == BUTTON_B) {
+    if (dur >= SHORT_CLICK && button == BUTTON_B) {
       modeTimeout = TickGet();
       uint16_t nReadings = 0;
       if (writeOF) {
@@ -117,13 +118,13 @@ void modeHandler(uint16_t dur, uint8_t button) {
         nReadings = writePtr / 2;
       }
       if (nReadings <= 0) {
-        Display("----");
+        Display("----", 0);
         return;
       }
-      readPtr = writePtr - 2; // Set to the latest record.
+      readPtr = -999;
       mode = VIEW_STORED;
       sprintf(disp, "A%03d", nReadings);
-      Display(disp);
+      Display(disp, 0);
     }
     return;
   }
@@ -132,55 +133,40 @@ void modeHandler(uint16_t dur, uint8_t button) {
   if (mode == VIEW_STORED) {
     modeTimeout = TickGet();
 
-    if (dur > SHORT_CLICK && button == BUTTON_A) { // ++
-      if (readPtr < 0 && !writeOF) {
-        readPtr += 0;
-      }
-      if (readPtr >= writePtr) {
-        Display("----");
-        return;
-      }
-      if (readPtr >= MAX_DATA_ADDR && writeOF) {
+    if (dur > SHORT_CLICK && button == BUTTON_A) { // + +
+      if (readPtr == -999) { // Initialize read pointer to the latest data point.
+        readPtr = writePtr - 2;
+        if (readPtr < 0 && writeOF) {
+          readPtr = MAX_DATA_ADDR - 2;
+        }
+      } else if (!writeOF && readPtr == writePtr - 2) { // at Max.
+      } else if (writeOF && readPtr == MAX_DATA_ADDR - 2) {
         readPtr = 0;
+      } else {
+        readPtr += 2;
       }
-      if (readPtr == writePtr && !writeOF) {
-        readPtr = -2;
-      }
-      if (readPtr == writePtr && writeOF) {
-        readPtr = writePtr + 2;
-      }
-      sprintf(disp, "B%03d", readPtr);
-      Display(disp);
-      readPtr += 2;
     }
-    if (dur > SHORT_CLICK && button == BUTTON_B) { // --
-      if (readPtr >= writePtr) {
+    if (dur > SHORT_CLICK && button == BUTTON_B) { // - -
+      if (readPtr == -999) {// Initialize read pointer to the oldest data point.
+        if (writeOF) {
+          readPtr = writePtr;
+        } else {
+          readPtr = 0;
+        }
+      } else if (!writeOF && readPtr == 0) { // At oldest
+      } else if (writeOF && readPtr == 0) {
+        readPtr = MAX_DATA_ADDR - 2;
+      } else {
         readPtr -= 2;
       }
-
-      if (readPtr < 0 && !writeOF) {
-        Display("--");
-        return;
-      }
-      if (readPtr < 0 && writeOF) {
-        readPtr = MAX_DATA_ADDR - 2;
-      }
-
-      if (readPtr == writePtr && !writeOF) {
-        Display("--");
-        return;
-      }
-      if (readPtr == writePtr && writeOF) {
-        Display("-");
-        return;
-      }
-      sprintf(disp, "B%03d", readPtr);
-      Display(disp);
-      readPtr -= 2;
     }
-    return;
-  }
 
+    /* mdisp[0] = readPtr;
+     mdisp[1] = DATAEE_ReadByte(readPtr);
+     mdisp[2] = DATAEE_ReadByte(readPtr + 1);*/
+    sprintf(disp, "I%03d", readPtr);
+    Display(disp, 0);
+  }
 
   if (mode == SELECT_INTERVAL) {
     modeTimeout = TickGet();
@@ -195,7 +181,7 @@ void modeHandler(uint16_t dur, uint8_t button) {
       resetData();
       DATAEE_WriteByte(CONFIG_ADDR + 3, interval);
       sprintf(disp, "I%03d", interval);
-      Display(disp);
+      Display(disp, 0);
     }
     return;
   }
@@ -204,7 +190,7 @@ void modeHandler(uint16_t dur, uint8_t button) {
 void DisplayTask(void) {
   static uint32_t last = 0;
   int8_t err = 0;
-  char disp[5] = "\0\0\0\0\0", temp[5] = "", humidity[5] = "";
+  char disp[3][5] = {'\0'};
 
   uint32_t now = TickGet();
   if ((now - last) / (TICK_MILLISECOND) >= DISPLAY_ALT) {
@@ -215,49 +201,47 @@ void DisplayTask(void) {
       if (err < 0) {
         DisplayError(err);
       } else {
-        sprintf(temp, "T%03d", GetTemp());
-        sprintf(humidity, "H%03d", GetHumidity());
+        sprintf(disp[0], "T%03d", GetTemp());
+        sprintf(disp[1], "H%03d", GetHumidity());
         switch (displayMode) {
           case TEMP_HUMIDITY:
-            AltDisplay(temp, humidity);
+            AltDisplay(disp, 2);
             break;
           case TEMP_ONLY:
-            Display(temp);
+            Display(disp[0], 0);
             break;
           case HUMIDITY_ONLY:
-            Display(humidity);
+            Display(disp[1], 0);
             break;
         }
       }
     }
+
   }
 }
 
-void AltDisplay(char t1[], char t2[]) {
+void AltDisplay(const char d[5][5], uint8_t len) {
   static char bSwitch = 0;
-
-  if (bSwitch) {
-    Display(t1);
+  Display(d[bSwitch], 0);
+  bSwitch++;
+  if (bSwitch >= len) {
     bSwitch = 0;
-  } else {
-    Display(t2);
-    bSwitch = 1;
   }
 }
 
 void DisplayError(int8_t errorCode) {
   switch (errorCode) {
     case ERR_DHT11_TIMEOUT_RESPONSE:
-      Display("E-01");
+      Display("E-01", 0);
       break;
     case ERR_DHT11_CHECKSUM_FAILURE:
-      Display("E-02");
+      Display("E-02", 0);
       break;
     case ERR_DHT11_TIMEOUT_DATA:
-      Display("E-03");
+      Display("E-03", 0);
       break;
     default:
-      Display("E-00");
+      Display("E-00", 0);
       break;
   }
 }
@@ -266,9 +250,9 @@ void WriteMemoryTask(void) {
   static uint32_t last = 0;
   int8_t temp = 0, humidity = 0, err = 0;
 
- /* if (!interval) {
-    return;
-  }*/
+  /* if (!interval) {
+     return;
+   }*/
 
   uint32_t now = TickGet();
   /* if ((now - last) / TICK_MINUTE > interval) { */
@@ -279,11 +263,11 @@ void WriteMemoryTask(void) {
     temp = GetTemp();
     humidity = GetHumidity();
     if (err < 0) {
+
       writeData(0, 0);
     }
     writeData(temp, humidity);
   }
-
 }
 
 // writeData writes data to EEPROM using the first 1000 bytes.
@@ -312,6 +296,7 @@ void writeData(uint8_t temp, uint8_t humidity) {
 }
 
 void resetData(void) {
+
   writePtr = 0;
   writeOF = 0;
 }

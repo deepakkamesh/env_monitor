@@ -4,13 +4,15 @@
 #include "string.h"
 
 char display[5] = "";
+uint8_t dots = 0;
 
-int Display(const char d[]) {
+int Display(const char d[], uint8_t dt) {
   if (strlen(d) > 4) {
     strcpy(display, "ERR");
     return -1;
   }
   strcpy(display, d);
+  dots = dt;
   return 0;
 }
 
@@ -92,6 +94,10 @@ void HPltc5851DisplayTask(void) {
         break;
       default:
         MULTIPLEXER = ALPHA_E;
+    }
+
+    if (dots & i + 1) {
+      MULTIPLEXER &= ~0x80;
     }
 
     // Turn on the digit.
