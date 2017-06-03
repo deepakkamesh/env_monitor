@@ -50,6 +50,7 @@
 #include "tick.h"
 #include "dht11_device.h"
 #include "pushbutton_device.h"
+#include "us020_device.h"
 
 /*
                          Main application
@@ -97,6 +98,7 @@ void main(void) {
     DisplayTask();
     PushButtonTask();
     WriteMemoryTask();
+    ultrasonicTask();
   }
 }
 

@@ -13,6 +13,10 @@ int Display(const char d[], uint8_t dt) {
     strcpy(display, "ERR");
     return -1;
   }
+  if (strlen(d) == 0) {
+    strcpy(display, "    ");
+    return -1;
+  }
   strcpy(display, d);
   dots = dt;
   return 0;
@@ -71,7 +75,7 @@ void HPltc5851DisplayTask(void) {
         MULTIPLEXER = ALPHA_B;
         break;
       case 'C':
-        MULTIPLEXER = ALPHA_C;
+        MULTIPLEXER = ALPHA_c;
         break;
       case 'D':
         MULTIPLEXER = ALPHA_D;
@@ -94,10 +98,16 @@ void HPltc5851DisplayTask(void) {
       case 'I':
         MULTIPLEXER = ALPHA_I;
         break;
+      case 'c':
+        MULTIPLEXER = ALPHA_c; 
+        break;
+      case ' ':
+        MULTIPLEXER = CHAR_SPACE; 
+        break;
       default:
         MULTIPLEXER = ALPHA_E;
     }
-    
+
     // Turn on the digit and the dot if set.
     switch (i) {
       case 0:
