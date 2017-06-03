@@ -7,8 +7,8 @@
 #include "pushbutton_device.h"
 #include "dht11_device.h"
 
-#define SHORT_CLICK 100
-#define LONG_CLICK 3000 
+#define SHORT_CLICK 100 // Time in ms for a short click recognition.
+#define LONG_CLICK 3000 // Time in ms for a long click recognition.
 #define DISPLAY_ALT 1000 // Switch time for alternating display in ms.
 #define MODE_TIMEOUT 10000  // Timeout in ms before going back to mode normal.
 
@@ -16,7 +16,7 @@
 #define CONFIG_ADDR 1020
 
 uint8_t mode = NORMAL;
-uint8_t displayMode = TEMP_HUMIDITY;
+uint8_t displayMode = ALT_TEMP_HUMIDITY;
 uint8_t interval = 0; // Frequency to log data in minutes.
 uint32_t modeTimeout = 0;
 int16_t readPtr = 0; // Pointer to the next address to be written.
@@ -97,6 +97,9 @@ void modeHandler(uint16_t dur, uint8_t button) {
           displayMode = TEMP_HUMIDITY;
           break;
         case TEMP_HUMIDITY:
+          displayMode = ALT_TEMP_HUMIDITY;
+          break;
+        case ALT_TEMP_HUMIDITY:
           displayMode = TEMP_ONLY;
           break;
       }
@@ -201,10 +204,13 @@ void DisplayTask(void) {
       if (err < 0) {
         DisplayError(err);
       } else {
-        sprintf(disp[0], "T%03d", GetTemp());
-        sprintf(disp[1], "H%03d", GetHumidity());
+        uint8_t temp = GetTemp();
+        uint8_t humidity = GetHumidity();
+        sprintf(disp[0], "T%03d",temp);
+        sprintf(disp[1], "H%03d",humidity);
+        sprintf(disp[2], "%02d%02d",temp,humidity);
         switch (displayMode) {
-          case TEMP_HUMIDITY:
+          case ALT_TEMP_HUMIDITY:
             AltDisplay(disp, 2);
             break;
           case TEMP_ONLY:
@@ -213,10 +219,11 @@ void DisplayTask(void) {
           case HUMIDITY_ONLY:
             Display(disp[1], 0);
             break;
+          case TEMP_HUMIDITY:
+            Display(disp[2],6);
         }
       }
     }
-
   }
 }
 

@@ -17,11 +17,12 @@ extern "C" {
   void DisplayError(int8_t errorCode);
   void WriteMemoryTask(void);
   void PushButtonInit(void);
-  
+
   // Display Modes.
 #define TEMP_ONLY 0x1
 #define HUMIDITY_ONLY 0x2
 #define TEMP_HUMIDITY 0x3
+#define ALT_TEMP_HUMIDITY 0x4
 
   // Modes
 #define NORMAL 0x1

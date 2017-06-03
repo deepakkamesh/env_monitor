@@ -3,8 +3,10 @@
 #include "tick.h"
 #include "string.h"
 
-char display[5] = "";
-uint8_t dots = 0;
+char display[5] = ""; // display contains the current string to be displayed.
+uint8_t dots = 0; // dots contains a bit map of dots to be turned on.
+
+// Display gets the string and dots to be displayed.
 
 int Display(const char d[], uint8_t dt) {
   if (strlen(d) > 4) {
@@ -95,23 +97,31 @@ void HPltc5851DisplayTask(void) {
       default:
         MULTIPLEXER = ALPHA_E;
     }
-
-    if (dots & i + 1) {
-      MULTIPLEXER &= ~0x80;
-    }
-
-    // Turn on the digit.
+    
+    // Turn on the digit and the dot if set.
     switch (i) {
       case 0:
+        if (dots & 1) {
+          MULTIPLEXER &= ~0x80;
+        }
         DIGIT1_PORT = 0;
         break;
       case 1:
+        if (dots & 2) {
+          MULTIPLEXER &= ~0x80;
+        }
         DIGIT2_PORT = 0;
         break;
       case 2:
+        if (dots & 4) {
+          MULTIPLEXER &= ~0x80;
+        }
         DIGIT3_PORT = 0;
         break;
       case 3:
+        if (dots & 8) {
+          MULTIPLEXER &= ~0x80;
+        }
         DIGIT4_PORT = 0;
         break;
     }
