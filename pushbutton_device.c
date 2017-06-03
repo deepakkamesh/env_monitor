@@ -8,12 +8,17 @@
 #include "dht11_device.h"
 #include "us020_device.h"
 
+//#define DEBUGDKG  // TODO: remove debug flag in producion.
+
 #define SHORT_CLICK 100 // Time in ms for a short click recognition.
 #define LONG_CLICK 3000 // Time in ms for a long click recognition.
 #define DISPLAY_ALT 700 // Switch time for alternating display in ms.
 #define MODE_TIMEOUT 10000  // Timeout in ms before going back to mode normal.
-
+#ifdef DEBUGDKG
+#define MAX_DATA_ADDR 22
+#else
 #define MAX_DATA_ADDR 1000 // Should be an even number. Max readings is MAX_ADDR/2
+#endif
 #define CONFIG_ADDR 1020
 
 uint8_t mode = NORMAL;
@@ -31,6 +36,8 @@ void modeHandler(uint16_t dur, uint8_t button);
 void writeData(uint8_t temp, uint8_t humidity);
 void resetData(void);
 void AltDisplay(const char[5][5], uint8_t len, uint8_t dots[]);
+
+// Pushbutton Task handles the pushbutton state.
 
 void PushButtonTask(void) {
   static uint16_t dur = 0;
@@ -90,7 +97,7 @@ void modeHandler(uint16_t dur, uint8_t button) {
   uint16_t nReadings = 0;
 
   if (mode == NORMAL) {
-    // Change display mode.
+    // Display Change mode.
     if (dur >= SHORT_CLICK && dur < LONG_CLICK && button == BUTTON_A) {
       switch (displayMode) {
         case TEMP_ONLY:
@@ -107,7 +114,7 @@ void modeHandler(uint16_t dur, uint8_t button) {
           break;
       }
     }
-    // Interval select screen.
+    // Change to SELECT_INTERVAL mode.
     if (dur >= LONG_CLICK && button == BUTTON_A) {
       modeTimeout = TickGet();
       mode = SELECT_INTERVAL;
@@ -117,11 +124,7 @@ void modeHandler(uint16_t dur, uint8_t button) {
     // Switch to Data View mode.
     if (dur >= SHORT_CLICK && button == BUTTON_B) {
       modeTimeout = TickGet();
-      if (writeOF) {
-        nReadings = MAX_DATA_ADDR / 2;
-      } else {
-        nReadings = writePtr / 2;
-      }
+      nReadings = writePtr / 2;
       if (nReadings <= 0) {
         Display("----", 0);
         return;
@@ -132,46 +135,46 @@ void modeHandler(uint16_t dur, uint8_t button) {
       sprintf(mdisp[0], "A%03d", nReadings);
       mdispDot[0] = 0;
     }
+
+    // Reset Data Storage.
+    if (dur >= LONG_CLICK && button == BUTTON_B) {
+      resetData();
+      Display("----", 0);
+    }
     return;
   }
 
 
   if (mode == VIEW_STORED) {
     modeTimeout = TickGet();
-    uint8_t cnt = 0;
 
     if (dur > SHORT_CLICK && button == BUTTON_A) { // + +
       // Initialize read pointer to the latest data point.
       if (readPtr == -999) {
         readPtr = writePtr - 2;
-        if (readPtr < 0 && writeOF) {
-          readPtr = MAX_DATA_ADDR - 2;
-        }
-      } else if (writeOF && readPtr == MAX_DATA_ADDR - 2) {
-        readPtr = 0;
+      } else if (readPtr == writePtr - 2) { // Maxed out.
+        readPtr = writePtr - 2;
       } else {
         readPtr += 2;
       }
     }
     if (dur > SHORT_CLICK && button == BUTTON_B) { // - -
-      if (readPtr == -999) {// Initialize read pointer to the oldest data point.
-        if (writeOF) {
-          readPtr = writePtr;
-        } else {
-          readPtr = 0;
-        }
-      } else if (writeOF && readPtr == 0) {
-        readPtr = MAX_DATA_ADDR - 2;
+      // Initialize read pointer to the oldest data point.
+      if (readPtr == -999) {
+        readPtr = 0;
+      } else if (readPtr == 0) { // At oldest.
+        readPtr = 0;
       } else {
         readPtr -= 2;
       }
     }
 
     mdispLen = 2;
-    sprintf(mdisp[0], "R%03d", readPtr/2);
+    sprintf(mdisp[0], "R%03d", (readPtr / 2)+1);
     sprintf(mdisp[1], "%02d%02d", DATAEE_ReadByte(readPtr + 1), DATAEE_ReadByte(readPtr));
-    mdispDot[0] = 1;
+    mdispDot[0] = 8;
     mdispDot[1] = 6;
+    return;
   }
 
   if (mode == SELECT_INTERVAL) {
@@ -194,58 +197,62 @@ void modeHandler(uint16_t dur, uint8_t button) {
 }
 
 void DisplayTask(void) {
-  static uint32_t last = 0;
   int8_t err = 0;
   char disp[3][5] = {'\0'};
 
-  uint32_t now = TickGet();
-  if ((now - last) / (TICK_MILLISECOND) >= DISPLAY_ALT) {
-    last = now;
- 
-    if (!SEL_GetValue()) {
-      sprintf(disp[0], "%03dc", GetDistance());
-      Display(disp[0], 0);
+
+  // Display Ultrasonic Distance if SEL if low.
+  if (!SEL_GetValue()) {
+    sprintf(disp[0], "%03dc", GetDistance());
+    Display(disp[0], 0);
+    return;
+  }
+
+  // If SEL is high (WPU enabled), display temp/humidity.
+  if (mode == NORMAL) {
+    uint8_t temp = GetTemp();
+    uint8_t humidity = GetHumidity();
+    err = GetError();
+    if (err < 0) {
+      DisplayError(err);
       return;
     }
-
-    if (mode == NORMAL) {
-      err = GetError();
-      if (err < 0) {
-        DisplayError(err);
-      } else {
-        uint8_t temp = GetTemp();
-        uint8_t humidity = GetHumidity();
-        uint8_t dots[] = {0, 0, 0};
-        sprintf(disp[0], "T%03d", temp);
-        sprintf(disp[1], "H%03d", humidity);
-        sprintf(disp[2], "%02d%02d", temp, humidity);
-        switch (displayMode) {
-          case ALT_TEMP_HUMIDITY:
-            AltDisplay(disp, 2, dots);
-            break;
-          case TEMP_ONLY:
-            Display(disp[0], 0);
-            break;
-          case HUMIDITY_ONLY:
-            Display(disp[1], 0);
-            break;
-          case TEMP_HUMIDITY:
-            Display(disp[2], 6);
-        }
-      }
+    uint8_t dots[] = {0, 0, 0, 0, 0};
+    sprintf(disp[0], "T%03d", temp);
+    sprintf(disp[1], "H%03d", humidity);
+    sprintf(disp[2], "%02d%02d", temp, humidity);
+    switch (displayMode) {
+      case ALT_TEMP_HUMIDITY:
+        AltDisplay(disp, 2, dots);
+        break;
+      case TEMP_ONLY:
+        Display(disp[0], 0);
+        break;
+      case HUMIDITY_ONLY:
+        Display(disp[1], 0);
+        break;
+      case TEMP_HUMIDITY:
+        Display(disp[2], 6);
     }
-
-    if (mode == VIEW_STORED) {
-      AltDisplay(mdisp, mdispLen, mdispDot);
-    }
-
   }
+
+  if (mode == VIEW_STORED) {
+    AltDisplay(mdisp, mdispLen, mdispDot);
+  }
+
 }
 
 //AltDisplay alternates between the strings in d[][] upto len. 
 
 void AltDisplay(const char d[5][5], uint8_t len, uint8_t dots[]) {
+  static uint32_t last = 0;
   static char bSwitch = 0;
+  uint32_t now = TickGet();
+
+  if ((now - last) / (TICK_MILLISECOND) < DISPLAY_ALT) {
+    return;
+  }
+  last = now;
   Display(d[bSwitch], dots[bSwitch]);
   bSwitch++;
   if (bSwitch >= len) {
@@ -272,26 +279,36 @@ void DisplayError(int8_t errorCode) {
 
 void WriteMemoryTask(void) {
   static uint32_t last = 0;
-  static uint8_t i = 1;
-  int8_t temp = 0, humidity = 0, err = 0;
+  uint8_t temp = 0, humidity = 0;
+  int8_t err = 0;
 
-   if (!interval) {
-     return;
-   }
+#ifndef DEBUGDKG
+  if (!interval) {
+    return;
+  }
+#endif
 
   uint32_t now = TickGet();
-   if ((now - last) / TICK_MINUTE > interval) { 
- // if ((now - last) / TICK_SECOND > 5) {
+#ifndef DEBUGDKG
+  if ((now - last) / TICK_MINUTE > interval) {
+#else
+  static uint8_t i = 1;
+  if ((now - last) / TICK_SECOND > 7) {
+#endif
     last = now;
     err = GetError();
     temp = GetTemp();
     humidity = GetHumidity();
     if (err < 0) {
       writeData(0, 0);
+      return;
     }
+#ifndef DEBUGDKG
     writeData(temp, humidity);
-    //writeData(i, i);
+#else
+    writeData(i, i);
     i += 1;
+#endif
   }
 }
 
@@ -320,13 +337,23 @@ void writeData(uint8_t temp, uint8_t humidity) {
 }
 
 void resetData(void) {
+  uint8_t wrLSB = 0, wrMSB = 0;
+
   writePtr = 0;
   writeOF = 0;
+
+  // Store write pointer in case of power loss.
+  wrMSB = writeOF;
+  wrLSB = writePtr & 0xFF;
+  wrMSB = wrMSB << 2 | writePtr >> 8;
+
+  DATAEE_WriteByte(CONFIG_ADDR, 189); // Write magic number.
+  DATAEE_WriteByte(CONFIG_ADDR + 1, wrMSB);
+  DATAEE_WriteByte(CONFIG_ADDR + 2, wrLSB);
 }
 
 void PushButtonInit(void) {
   uint8_t wrLSB = 0, wrMSB = 0;
-
   // Load config from eeprom if was initialized by checking for magic number
   // 189 at CONFIG_ADDR. 
   if (DATAEE_ReadByte(CONFIG_ADDR) != 189) {
